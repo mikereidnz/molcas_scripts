@@ -7,11 +7,16 @@ This script generates as shell script to run the molcas helper files and molcas 
 
 # Author:    Mike Reid
 
+from xml.parsers.expat import model
+
 import numpy as np
 
 config = {
     "script_name": "run_molcas.sh",
-    # Name of the quantum region. This is used to name the output files.
+    # This is used to name the output files and the scratch directory
+    # so it should be reasonably unique.
+    "calculation_name": "cey2o3",
+    # Formula of the quantum region.
     "quantum_region": "YO6",
     "vasp_file": "../Y2O3.vasp",
     # Name of the rare-earth ion
@@ -20,13 +25,15 @@ config = {
     "number_of_orbitals": 7,
     "coordination_number": 6,
     "molecular_charge": 0,
-    # Model space for the CF projction.
+    # Model space for the CF projection.
+    # In this case the ground term.
     "model_space": "2F",
     # Atom at the centre of the cluster:
     "central_atom_symbol": "Y",
     # note that this is the index of the atom in the vasp file, starting from 1.
     "central_atom_number": 11,
-    # Cluster cutoff in Angstroms. No need to change this.
+    # Cluster cutoff in Angstroms.
+    # Do not change this, as it is hard-coded into the molcas input command.
     "cluster_cutoff": 30,
     # Charge of the atoms in the cluster, in the order of the atoms in the vasp file:
     "charges": [
@@ -70,7 +77,15 @@ print("\nWriting script to:", config["script_name"])
 with open(config["script_name"], "w") as f:
 
     f.write("# Run molcas helper files and molcas itself\n")
-    f.write("# Cut and paste the following lines:\n")
+    f.write("# Cut and paste the following lines:\n\n")
+    f.write(
+        "# Be sure to check the quantum region and check the orbitals in orbs.out to ensure that they are all f orbitals.\n"
+    )
+    f.write("# Some error message will be obvious, such as a file name\n")
+    f.write(
+        "# Others will be more subtle, such as an error in atom name, number of f electrons, coordination number, \n"
+        "# or model space (ground term in this case).\n"
+    )
 
     f.write("\n# Build the cluster file cluster.xyz and the file qm_region.xyz\n")
     f.write(
@@ -95,39 +110,41 @@ with open(config["script_name"], "w") as f:
         f"env_suite charges {config['vasp_file']} --from_cluster cluster.xyz --charges ../charges.dat\n"
     )
 
-    f.write(f"\n# Make the molcas input file {config['quantum_region']}.input\n")
+    f.write(f"\n# Make the molcas input file {config['calculation_name']}.input\n")
     f.write(f"# Arguments:\n")
     f.write(f"# central atom, # f electrons, # orbitals, coordination number, molecular charge\n")
+    f.write(f"# --high_S_only: only calculate high spin states\n")
+    f.write(f"# You can remove this, but then probably need to specify the spin states manually\n")
     f.write(
-        f"molcas_suite generate_input cluster.xyz {config['ion_name']}1 {config['f_electrons']} {config['number_of_orbitals']} {config['coordination_number']} {config['molecular_charge']} --output {config['quantum_region']}.input --high_S_only --skip_magneto --gateway_extra 'basdir=$CurrDir' --decomp RICD_acCD --kirkwood 1e6 30 4 --optics\n"
+        f"molcas_suite generate_input cluster.xyz {config['ion_name']}1 {config['f_electrons']} {config['number_of_orbitals']} {config['coordination_number']} {config['molecular_charge']} --output {config['calculation_name']}.input --high_S_only --skip_magneto --gateway_extra 'basdir=$CurrDir' --decomp RICD_acCD --kirkwood 1e6 30 4 --optics\n"
     )
 
     f.write(f"\n# Edit the MLTP line of the molcas input file to do more g tensors\n")
-    f.write(f"sed -i 's/MLTP= 1; 2/{config['mltp_line']}/' {config['quantum_region']}.input\n")
+    f.write(f"sed -i 's/MLTP= 1; 2/{config['mltp_line']}/' {config['calculation_name']}.input\n")
 
     f.write("\n# Run molcas\n")
     f.write(
-        f"nice nohup pymolcas {config['quantum_region']}.input >| {config['quantum_region']}.out >&1 &\n"
+        f"nice nohup pymolcas {config['calculation_name']}.input >| {config['calculation_name']}.out >&1 &\n"
     )
 
     f.write(f"\n# Check active space. Create orbs.out\n")
     f.write("# Check that that file to ensure that the orbitals are all f orbitals. \n")
-    f.write(f"molcas_suite orbs {config['quantum_region']}.rasscf.h5 --index 2 >| orbs.out\n")
+    f.write(f"molcas_suite orbs {config['calculation_name']}.rasscf.h5 --index 2 >| orbs.out\n")
 
     f.write(f"\n# Read the molcas output and extract the energy levels and g tensors\n")
-    f.write(f"read_molcas_output.py {config['quantum_region']}.out >| read_molcas.out\n")
+    f.write(f"read_molcas_output.py {config['calculation_name']}.out >| read_molcas.out\n")
 
     f.write(f"\n# Project CF parameters in Stevens normalization\n")
     f.write(
-        f"angmom_suite proj --molcas_rassi {config['quantum_region']}.rassi.h5 --model_space {config['model_space']} --terms cf=L soc=L,S --theta --ion {config['ion_name']}3+  -o proj.hdf5\n"
+        f"angmom_suite proj --molcas_rassi {config['calculation_name']}.rassi.h5 --model_space {config['model_space']} --terms cf=L soc=L,S --theta --ion {config['ion_name']}3+  -o proj.hdf5\n"
     )
 
     f.write(f"\n# Convert CF parameters in Wybourne normalization\n")
     f.write(f"read_cf.py >| wybourne.out\n")
 
     f.write(f"\n# Oscillator Strengths: \n")
-    f.write(f"angmom_suite optics --molcas_rassi {config['quantum_region']}.rassi.h5\n")
-    f.write(f"\n# Plotting: \n")
+    f.write(f"angmom_suite optics --molcas_rassi {config['calculation_name']}.rassi.h5\n")
+    f.write(f"\n# Write and plot selected transitions: \n")
     for transition in config["transitions_list"]:
         initial_range = transition["initial_range"]
         final_range = transition["final_range"]
@@ -135,3 +152,7 @@ with open(config["script_name"], "w") as f:
         f.write(
             f"read_optics.py --initial-range {initial_range[0]} {initial_range[1]} --final-range {final_range[0]} {final_range[1]} --out-name {out_name}\n"
         )
+
+print("You can cut and paste lines from", config["script_name"], "\n")
+
+####################################################################
