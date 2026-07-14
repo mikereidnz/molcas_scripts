@@ -41,7 +41,7 @@ config = {
         ["O", 48, -2],
     ],
     # charges file name. No need to change this.
-    "charges_file": "charges.txt",
+    "charges_file": "charges.dat",
     # modified MLTP line for g tensor calculation.
     # number of multiplets then list of degeneracies of each multiplet. In our case all Kramers doublets, so all 2s.
     "mltp_line": "MLTP= 7; 2 2 2 2 2 2 2",
@@ -107,7 +107,7 @@ with open(config["script_name"], "w") as f:
     f.write("# This writes ENV - charge region only\n")
     f.write("# Also writes basistype.tbl\n")
     f.write(
-        f"env_suite charges {config['vasp_file']} --from_cluster cluster.xyz --charges ../charges.dat\n"
+        f"env_suite charges {config['vasp_file']} --from_cluster cluster.xyz --charges {config['charges_file']}\n"
     )
 
     f.write(f"\n# Make the molcas input file {config['calculation_name']}.input\n")
