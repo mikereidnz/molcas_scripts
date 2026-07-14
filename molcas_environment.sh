@@ -1,7 +1,7 @@
 # Functions to set up the molcas environment
 
-# Limit the  number of threads to 4:
-export OMP_NUM_THREADS=4
+# Limit the  number of threads to 4:  Not important if you don't use OMP. 
+# export OMP_NUM_THREADS=4
 # location of the Chilton molcas scripts
 export MOLCAS_ENV=/home/users/mfr24/molcas_env
 # location of our extra molcas scripts
@@ -14,7 +14,7 @@ export MOLCAS=/home/users/mfr24/open-molcas-26.06
 export MOLCAS_WORKDIR=/tmp
 # On servers you can use more memory, such as 32 GB
 export MOLCAS_MEM=16000
-# On servers use /scratch/$USER for the workdir. 
+# On servers use /scratch/$USER for the workdir and set the memory to 32 GB.
 # You will have to create this yourself on each server. 
 # export MOLCAS_WORKDIR=/scratch/$USER
  

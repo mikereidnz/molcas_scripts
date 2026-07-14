@@ -1,33 +1,11 @@
-# open-molcas Intallation and Run. 
-
-## Old instructions. 
-Download CIF
-
-Convert CIF to POSAR:  vasp_suite convert_cif --filename xxx.cif
-
-Build QM cluster: env_suite cluster --qm_formula 80 YO6 --cluster_cutoff 30 --poscar POSCAR
-
-Make charges file: nano charges.dat (list atomic charges in POSCAR order)
-
-Set up  charges into “basis set”: env_suite charges POSCAR --from_cluster cluster.xyz --charges charges.dat
-
-Create openMOLCAS file: molcas_suite generate_input cluster.xyz Er1 11 7 6 0 --output eq.input --high_S_only --skip_magneto --gateway_extra 'basdir=$CurrDir' --decomp RICD_acCD --Kirkwood 1e6 30 4
-
-RUN Molcas
-
-Check active space: molcas_suite orbs er_y203_c2.rasscf.h5 --index 2
-
-Project CFPs from output: angmom_suite proj --molcas_rassi er_y203_c2.rassi.h5 --model_space 4I --terms cf=L soc=L,S --quax quax.dat --theta --ion Er3+
-
-angmom_suite proj --molcas_rassi er_y203_c2.rassi.h5 --model_space 4I --terms cf=L soc=L,S --theta --ion Er3+
-
-
+# open-molcas and helper files installation. 
 
 ## Installation of open-molcas
 
 Our patched Molcas is here: https://gitlab.com/chilton-group/open-molcas
+### go to where you want to install the repo
+cd ~/dev 
 git clone https://gitlab.com/chilton-group/open-molcas
-### this seems unnecessary now: 
 git checkout v26.06-patched
 ### pull in lapack to build ourselves: 
 /usr/bin/git submodule update --init /home/users/mfr24/dev/open-molcas/External/lapack
@@ -39,9 +17,7 @@ cmake -DCMAKE_INSTALL_PREFIX=~/open-molcas-26.06  -DHDF5=ON ..
 make -j 4
 make install
 
-put installation in ~/molcas on server. 
-
-# open-molcas
+# open-molcas environment 
 export PATH=/home/users/mfr24/open-molcas-26.06:$PATH
 export MOLCAS=/home/users/mfr24/open-molcas-26.06
 export MOLCAS_WORKDIR=/tmp
@@ -49,25 +25,34 @@ export MOLCAS_MEM=16000
 
 pymolcas --banner
 
-
-use /scatch as the work directory on our servers. 
-
-## Python
+# on the servers: 
+export /scatch/$USER 
+ 
+## Python intallation
+### This can become dependency hell... 
+cd ~/dev 
 python3 -m venv ~/molcas_env
 source ~/molcas_env/bin/activate
-pip install env_suite molcas_suite vasp_suite angmom_suite spin_phonon_suite
 
+### The following works, but you end up uninstalling and reinstalling some pacages: 
 pip install molcas_suite
-
-1012  python3 -m venv ~/molcas_env
- 1013  source ~/molcas_env/bin/activate
- 1014  pip install molcas_suite
- 1015  pip install --upgrade pip
- 1016  pip install angmom_suite
- 1017  pip install env_suite
+pip install --upgrade pip
+pip install angmom_suite
+pip install env_suite
 pip install vasp_suite
 pip install phonopy==2.22.0
 pip install jax==0.6.2
+
+## in .bashrc: 
+source ~/mfr24/dev/molcas_scripts.sh 
+This will set up the environment for running pymolcas
+to activate the python envionment: 
+molcas_activate 
+
+You might consider creating a new file: molcas_scripts_local.sh with your preferences. 
+
+###################################################################################3
+## Old versions of instructions. 
 
 ## molcas
 
@@ -191,3 +176,23 @@ pymolcas er_y203_c3i.input > er_y203_c3i.out 2>&1  &
 
 
 
+# Old instructions. 
+Download CIF
+
+Convert CIF to POSAR:  vasp_suite convert_cif --filename xxx.cif
+
+Build QM cluster: env_suite cluster --qm_formula 80 YO6 --cluster_cutoff 30 --poscar POSCAR
+
+Make charges file: nano charges.dat (list atomic charges in POSCAR order)
+
+Set up  charges into “basis set”: env_suite charges POSCAR --from_cluster cluster.xyz --charges charges.dat
+
+Create openMOLCAS file: molcas_suite generate_input cluster.xyz Er1 11 7 6 0 --output eq.input --high_S_only --skip_magneto --gateway_extra 'basdir=$CurrDir' --decomp RICD_acCD --Kirkwood 1e6 30 4
+
+RUN Molcas
+
+Check active space: molcas_suite orbs er_y203_c2.rasscf.h5 --index 2
+
+Project CFPs from output: angmom_suite proj --molcas_rassi er_y203_c2.rassi.h5 --model_space 4I --terms cf=L soc=L,S --quax quax.dat --theta --ion Er3+
+
+angmom_suite proj --molcas_rassi er_y203_c2.rassi.h5 --model_space 4I --terms cf=L soc=L,S --theta --ion Er3+

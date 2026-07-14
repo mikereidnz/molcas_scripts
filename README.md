@@ -1,3 +1,8 @@
+# Molcas and helper files. 
+
+For installation of molcas and the Chilton python suits see molcas_install.md
+
+
 # Molcas Scripts
 
 Small Python utilities for reading Molcas output and related data files.
