@@ -18,7 +18,7 @@ import numpy as np
 ENERGY_RE = re.compile(
     r"^ENERGY OF THE SPIN-ORBIT STATE\s*\(\s*(\d+)\s*\)\s*=\s*([+-]?\d+(?:\.\d+)?)"
 )
-MULTIPLET_RE = re.compile(r"MULTIPLET\s+(\d+)\s*\(")
+MULTIPLET_RE = re.compile(r"MULTIPLET\s*(\d+)\s*\(")
 SO_STATE_RE = re.compile(
     r"^spin-orbit state\s+(\d+)\s*;\s*energy\(\d+\)\s*=\s*([+-]?\d+(?:\.\d+)?)\s*cm-1\."
 )
@@ -311,14 +311,14 @@ def print_multiplets(
         for row in g:
             print(f"    {row[0]: .12f} {row[1]: .12f} {row[2]: .12f}")
 
-        g_norm = normalize_g_tensor(g)
-        print("  Normalized g tensor:")
-        for row in g_norm:
-            print(f"    {row[0]: .12f} {row[1]: .12f} {row[2]: .12f}")
+        # g_norm = normalize_g_tensor(g)
+        # print("  Normalized g tensor:")
+        # for row in g_norm:
+        #     print(f"    {row[0]: .12f} {row[1]: .12f} {row[2]: .12f}")
 
-        if check:
-            print_gtensor_check(g)
-        print()
+        # if check:
+        #     print_gtensor_check(g)
+        # print()
 
 
 def main() -> int:
