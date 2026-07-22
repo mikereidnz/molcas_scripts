@@ -292,6 +292,11 @@ def print_pycf_complex_dict(
                 print(f'"{key}": {_fmt_num(val.real, decimals)}{sign}{imag_txt}j,')
 
 
+def conjugate_param_dict(params: dict[str, complex]) -> dict[str, complex]:
+    """Return a shallow copy with all values complex-conjugated."""
+    return {k: np.conjugate(v) for k, v in params.items()}
+
+
 def print_conversion_comparison(
     simple_pycf: dict[str, complex], chilton_dict: dict[str, complex]
 ) -> None:
@@ -414,6 +419,14 @@ if __name__ == "__main__":
     print_pycf_complex_dict(
         "Chilton conversion (pycf format)",
         chilton_pycf,
+        k_max=6,
+        decimals=args.pycf_decimals,
+    )
+
+    conjugated_chilton_pycf = conjugate_param_dict(chilton_pycf)
+    print_pycf_complex_dict(
+        "Chilton conversion (pycf format, conjugated)",
+        conjugated_chilton_pycf,
         k_max=6,
         decimals=args.pycf_decimals,
     )

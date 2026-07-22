@@ -3,9 +3,8 @@
 # Limit the  number of threads to 4:  Not important if you don't use OMP. 
 # export OMP_NUM_THREADS=4
 # location of the Chilton molcas scripts
-export MOLCAS_ENV=/home/users/mfr24/molcas_env
-# server location: 
-# export MOLCAS_ENV=/home/users/mfr24/dev/molcas_env
+# export MOLCAS_ENV=/home/users/mfr24/molcas_env
+export MOLCAS_ENV=/home/users/mfr24/dev/molcas_env
 # location of our extra molcas scripts
 export MOLCAS_EXTRA_PATH=/home/users/mfr24/dev/molcas_scripts
 export PATH=$MOLCAS_EXTRA_PATH:$PATH
@@ -13,13 +12,13 @@ export PATH=$MOLCAS_EXTRA_PATH:$PATH
 export PATH=/home/users/mfr24/open-molcas-26.06:$PATH
 export MOLCAS=/home/users/mfr24/open-molcas-26.06
 # On your own machine you can use /tmp for the workdir:
-export MOLCAS_WORKDIR=/tmp
-# on servers use /scratch/$USER for the workdir
-# you will have to create this yourself on each server.
-# export MOLCAS_WORKDIR=/scratch/$USER
+# export MOLCAS_WORKDIR=/tmp
+export MOLCAS_WORKDIR=/scratch/$USER
 # On servers you can use more memory, such as 32 GB
-export MOLCAS_MEM=16000
-# export MOLCAS_MEM=32000
+export MOLCAS_MEM=32000
+# On servers use /scratch/$USER for the workdir and set the memory to 32 GB.
+# You will have to create this yourself on each server. 
+# export MOLCAS_WORKDIR=/scratch/$USER
  
 # Helper to clean paths 
 path_remove() {
